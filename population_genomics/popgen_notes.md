@@ -46,3 +46,12 @@ This will keep my notes on population genomics coding sessions.
     -   process_bam.sh: processing the bams, uses program sambamba to convert sam to bam, sort, remove PCR dupes, and index
     -   bam_stats.sh: get mapping and coverage stats from our alignment
     -   After mapping.sh finishes running, I will submit this to SBATCH
+
+### 9/18/25: Review bam stats and setting up nucleotide diversity estimation using ANGSD
+
+-   Create new file to review our bam stats (found in 2101.stats.txt) to evaluate mapping success
+    -   Tried to do this, not working for me. Going to fix later
+-   Created a new script called `ANGSD.sh`
+    -   Creates the list of bam files
+-   Creating a wrapper
+    -   Leaving scripts to run over weekend
