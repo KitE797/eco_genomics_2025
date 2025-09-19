@@ -36,5 +36,5 @@ cd ~/projects/eco_genomics_2025/population_genomics/myscripts
 
 bash ANGSD.sh
 
-bash ANGDS_doTheta.sh
+bash ANGSD_doTheta.sh
 
