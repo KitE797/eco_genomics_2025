@@ -86,3 +86,9 @@ This will keep my notes on population genomics coding sessions.
     -   Script failed after running (ExitCode 127)
         -   Did not have the `.thetasWindow.gz.pestPG` file
         -   Realised that I accidentally wrote `ANGDS_doTheta.sh` instead of `ANGSD_doTheta.sh` (D and S switched) in the wrapper, so it failed because of that– resubmitted at 3:00pm on 9.19.25 to rerun, will hopefully work now
+
+### 9/18/25: Review bam stats and setting up nucleotide diversity estimation using ANGSD
+
+-   Fixed the 'cut' command in the ANGSD.sh script-- just ran in terminal to fix end file
+-   Created an rmarkdown file (/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/mydocs/Nucleotide_Diversity.Rmd) to explore "2101_ALL_win50000_step50000.thetas"
+-   

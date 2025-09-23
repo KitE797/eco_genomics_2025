@@ -1,0 +1,133 @@
+---
+title: "Nucleotide Diversity"
+author: "Kit Eller"
+date: "2025-09-23"
+output: html_document
+---
+
+Code chunk and directory setup:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/diversity/")
+```
+
+Import libraries for plotting:
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+
+Read in theta outputs:
+```{r}
+theta <- read.table("2101_ALL_win50000_step50000.thetas", sep = "\t", header = T)
+
+head(theta)
+
+```
+Scaling by nSites:
+```{r}
+# Scaling Watterson's theta by Nsites
+theta$tWsite = theta$tW/theta$nSites 
+
+# Scaling pi by nSites
+theta$tPsite = theta$tP/theta$nSites
+```
+
+```{r}
+
+summary(theta)
+
+theta2 = theta %>%
+  arrange(Chr, WinCenter) %>%
+  filter(Chr > 100)
+
+```
+
+Plot a histogram of how many sites are in each window that got sequenced:
+```{r}
+
+ggplot(theta2, mapping = aes(nSites)) +
+  geom_histogram(
+    bin = 50,
+    fill = "lightblue",
+    color = "lightblue4") +
+  geom_vline(
+    xintercept = median(theta2$nSites),
+    color = "pink4",
+    linetype = "dashed") +
+  labs(
+    title = "Distribution of Windows with Data",
+    x = "Number of Sites in 50 kb Windows",
+    y = "Frequency")
+
+ggplot(theta2, mapping = aes(
+  x = Chr,
+  y = tPsite,
+  color = Chr
+)) +
+  geom_point(
+    size = 0.75,
+    shape = 1,
+    show.legend = F
+  ) +
+  ylim(
+    0,
+    0.07
+  ) +
+  labs(
+    title = "Nucleotide Diversity in 50kB for Population 2101",
+    x = "Scaffold",
+    y = "Theta-Pi"
+  )
+
+```
+
+```{r}
+# Comparing pi and theta-w together, to look for deviation
+
+ggplot(theta2, mapping = aes(
+  x = tWsite,
+  y = tPsite,
+  color = Chr
+)) + 
+  geom_point(
+    size = 0.75,
+    shape = 1,
+    show.legend = F
+) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    linetype = "dashed",
+    color = "black"
+) +
+  labs(
+    title = "Pairwise Differences vs. Segregating Sites for Population 2101",
+    x = "Theta-W",
+    y = "Theta-Pi"
+)
+
+```
+Which windows have evidence of negative D and low nucleotide diversity?
+```{r}
+# theta2[which(theta2$Tajima < -1.5 & theta2$tPsite < 0.0001), 1:7]
+# No sites under these conditions
+
+theta2[which(theta2$Tajima < -1.5 & theta2$tPsite < 0.001), 1:7]
+
+summary(theta2)
+
+sum(theta2$nSites)
+```
+
+Pull out extremes of Tajima's D:
+```{r}
+BigD = theta2[which(theta2$Tajima == max(theta2$Tajima)),]
+
+SmallD = theta2[which(theta2$Tajima == min(theta2$Tajima)),]
+
+BigD
+SmallD
+
+```
+
