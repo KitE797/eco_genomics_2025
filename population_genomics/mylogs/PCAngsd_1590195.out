@@ -1,0 +1,16 @@
+cp: cannot create regular file '/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX': No such file or directory
+------------------------------------
+PCAngsd v1.36.1
+Jonas Meisner and Anders Albrechtsen
+Using 1 thread(s)
+------------------------------------
+
+Traceback (most recent call last):
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/bin/pcangsd", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/lib/python3.11/site-packages/pcangsd/main.py", line 166, in main
+    with open(args.out + ".log", "w") as log:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/RSBS_poly_K2.log'
+/var/spool/slurm/d/job1590195/slurm_script: line 76: --maf: command not found
