@@ -19,7 +19,7 @@ library(ggpubr)
 
 1.) Estimate PCA
 ```{r}
-COV <- as.matrix(read.table("RSBS_poly.cov")) # read in the genetic covariance matrix
+COV <- as.matrix(read.table("RSBS_poly_K2.cov")) # read in the genetic covariance matrix
 
 PCA <- eigen(COV) # extract the principal components from the COV matrix
 ```
@@ -59,7 +59,7 @@ ggscatter(data, x = "V1", y = "V2",
 ```
 
 ```{r}
-q <- read.table("RSBS_poly.admix.2.Q", sep=" ", header=F)
+q <- read.table("RSBS_poly_K2.admix.2.Q", sep=" ", header=F)
 
 K=dim(q)[2] #Find the level of K modeled
 

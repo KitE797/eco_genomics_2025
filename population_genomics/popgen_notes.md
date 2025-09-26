@@ -101,7 +101,7 @@ This will keep my notes on population genomics coding sessions.
     -   Located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/mydocs/Nucleotide_Diversity.Rmd`
     -   Pulled out different diversity metrics for population 2101, which were shared with the whole class on a google sheet: <https://docs.google.com/spreadsheets/d/1SLwhW3OgQiX2z1rxH-ske236NYxjDXCvUu0l8XFeS_w/edit?usp=sharing>
 
-### 9/25/25: Calculating Fst and admix for red spruce vs black spruce
+### 9/25/25: Calculating Fst and admixture for red spruce vs black spruce
 
 -   Created a bash script called `ANGSD_Fst.sh` to calculate Fst between my pop (2101) and the black spruce population
     -   Script located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts`
@@ -111,4 +111,17 @@ This will keep my notes on population genomics coding sessions.
         -   `2101_WISC_Fst_50kbWindows.txt`
         -   `2101_WISC_Fst.txt`
         -   Located in `~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/Fst`
--   
+-   Also created a bash script called `PCAngsd_RCBS.sh` to use PCAngsd (iterative approach that refines estimation of allele frequencies for each individual as it finds clusters that the individual may have ancestry in)
+    -   Script located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts`
+    -   Input beagle file (which has the genotype likelihoods) is located in `/gpfs1/cl/ecogen/pbio6800/PopulationGenomics/ANGSD/RSBS_poly.beagle.gz`
+        -   Code for calculating genotype likelihoods is located in `/gpfs1/cl/ecogen/pbio6800/PopulationGenomics/scripts/ANGSD_RSBS_poly.sh`
+    -   Couldn't get code to work for most of class but got it at end
+    -   Produced:
+        -   `RSBS_bam.list`
+        -   `RSBS_poly_K2.admix.2.Q`
+        -   `RSBS_poly_K2.log`
+        -   `RSBS_poly_K2.admix.2.P`
+        -   `RSBS_poly_K2.cov`
+        -   Located in `~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX`
+-   Also created an rmarkdown script called `PCA_Admix.Rmd` that will let us visualize the PCAngsd
+    -   Script located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts`
