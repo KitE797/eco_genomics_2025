@@ -65,6 +65,7 @@ This will keep my notes on population genomics coding sessions.
     -   New file called `bamstats_review.r`.
     -   Located in `/users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts`
     -   Tried to do this, not working for me. Going to troubleshoot later
+    -   9/26/25: Finally got to work, had to manually make sure all separators were either tab or space– it had been mixed for some reason
 
 -   Created a new script called `ANGSD.sh`
 
@@ -86,9 +87,28 @@ This will keep my notes on population genomics coding sessions.
     -   Script failed after running (ExitCode 127)
         -   Did not have the `.thetasWindow.gz.pestPG` file
         -   Realised that I accidentally wrote `ANGDS_doTheta.sh` instead of `ANGSD_doTheta.sh` (D and S switched) in the wrapper, so it failed because of that– resubmitted at 3:00pm on 9.19.25 to rerun, will hopefully work now
+        -   9/23/25: Worked! Produced:
+            -   `2101_ALL.sfs`
+            -   `2101_ALL_win50000_step50000.thetas`
+            -   `2101_ALL_win50000_step50000.thetasWindow.gz.pestPG`
+            -   `2101_ALL_win_step.thetas`
+            -   These files all located in `~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/diversity`
 
-### 9/18/25: Review bam stats and setting up nucleotide diversity estimation using ANGSD
+### 9/23/25: Reviewing nucleotide diversity for my population
 
 -   Fixed the 'cut' command in the ANGSD.sh script-- just ran in terminal to fix end file
--   Created an rmarkdown file (/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/mydocs/Nucleotide_Diversity.Rmd) to explore "2101_ALL_win50000_step50000.thetas"
+-   Created an rmarkdown file called `Nucleotide_Diversity.Rmd` to explore `2101_ALL_win50000_step50000.thetas`
+    -   Located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/mydocs/Nucleotide_Diversity.Rmd`
+    -   Pulled out different diversity metrics for population 2101, which were shared with the whole class on a google sheet: <https://docs.google.com/spreadsheets/d/1SLwhW3OgQiX2z1rxH-ske236NYxjDXCvUu0l8XFeS_w/edit?usp=sharing>
+
+### 9/25/25: Calculating Fst and admix for red spruce vs black spruce
+
+-   Created a bash script called `ANGSD_Fst.sh` to calculate Fst between my pop (2101) and the black spruce population
+    -   Script located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts`
+    -   Black spruce input saf.idx data located `/gpfs1/cl/ecogen/pbio6800/PopulationGenomics/ANGSD/black_spruce`
+    -   Produced:
+        -   `2101_WISC_2D.sfs`
+        -   `2101_WISC_Fst_50kbWindows.txt`
+        -   `2101_WISC_Fst.txt`
+        -   Located in `~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/Fst`
 -   
