@@ -62,7 +62,7 @@ cp ${INPUT}/RSBS_bam.list ${OUT}
 # K corresponds to the number of distinct ancestry groups you want to cluster genotypes into
 # We're just testing two populations-- red and black spruce-- so K=2
 
-K=2
+K=8
 E=$((K-1))
 
 # Then, run PCA and admixture scores with pcangsd:

@@ -1,0 +1,28 @@
+PCAngsd v1.36.1
+Time: 30/09/2025 16:38:46
+Directory: /gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts
+Options:
+	--beagle /gpfs1/cl/ecogen/pbio6800/PopulationGenomics/ANGSD/allRS_poly.beagle.gz
+	--eig 2
+	--threads 10
+	--out /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3
+	--selection
+	--snp_weights
+	--selection_eig 2
+	--admix
+	--admix_K 3
+	--maf_save
+	--sites_save
+
+Loaded 687863 sites and 95 samples.
+Number of sites after MAF filtering (0.05): 542303
+
+PCAngsd did not converge using 2 eigenvectors!
+Saved covariance matrix as /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3.cov
+Saved test statistics as /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3.selection
+Saved SNP weights as /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3.weights
+Saved admixture proportions as /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3.admix.3.Q
+Saved ancestral allele frequencies proportions as /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3.admix.3.P
+Saved minor allele frequencies as /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3.freqs
+Saved boolean vector of sites kept after filtering as /users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/allRS_poly_K3.sites
+Total elapsed time: 1m48s

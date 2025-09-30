@@ -1,0 +1,118 @@
+---
+title: "Red_Spruce_Selection"
+output: html_document
+date: "2025-09-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX/")
+```
+
+Load libraries
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+library(qqman)
+```
+
+Remaking the PCA, but just for the red spruce samples (we've removed black spruce)
+
+```{r}
+allRScov <- as.matrix(read.table("allRS_poly_K3.cov"))
+
+allRSPCA <- eigen(allRScov)
+
+var <- round(allRSPCA$values/sum(allRSPCA$values),3)
+
+var[1:3]
+
+# A "screeplot" of the eigenvalues of the PCA:
+
+barplot(var, 
+        xlab="Eigenvalues of the PCA", 
+        ylab="Proportion of variance explained")
+```
+Prepare the sa,ple ID info for plotting later:
+```{r}
+names <- read.table("allRS_bam.list")
+names <- unlist(strsplit(basename(as.character(names[,1])), split = ".sorted.rmdup.bam"))
+split = strsplit(names, "_")
+pops <- data.frame(names[1:95], do.call(rbind, split[1:95]))
+# Names only goes from 1-95, because we took out the black spruce samples. Would be 1-113 if we had black spruce as well
+names(pops) = c("Ind", "Pop", "Row", "Col")
+```
+
+
+Making the actual PCA, just red spruce and not black spruce
+```{r}
+data = as.data.frame(allRSPCA$vectors)
+data = data[,c(1:3)]
+data = cbind(data, pops)
+
+# PCA with just red spruce (95 samples):
+
+ggscatter(data, x = "V1", y = "V2",
+          color = "Pop",
+          mean.point = TRUE,
+          star.plot = TRUE,
+          main="Red spruce-Black spruce genetic PCA") +
+  theme_bw(base_size = 13, base_family = "Times") +
+  labs(x = paste0("PC1: (",var[1]*100,"%)"), y = paste0("PC2: (",var[2]*100,"%)"))
+```
+Test for correlation between admixture scores from the red-black spruce analysis and the PC 1 scores from the red spruce only analysis. Is PC1 still an axis of introgression? Is there any evidence for introgression also along PC2?
+```{r}
+q_K2 <- read.table("RSBS_poly_K3.admix.3.Q")
+names(q_K2) = c("qBS","qRS")
+
+data2 <- cbind(q_K2[1:95,1:2],data)
+  
+p1 <- ggscatter(data2, x ="qBS", y = "V1",
+          color="Pop",
+          main="Red spruce-Black spruce genetic PCA") +
+  theme_bw(base_size = 13, base_family = "Times") +
+  labs(x = "Black spruce ancestry", y = "PC1 score")
+
+p2 <- ggscatter(data2, x ="qBS", y = "V2",
+                color="Pop",
+                main="Red spruce-Black spruce genetic PCA") +
+  theme_bw(base_size = 13, base_family = "Times") +
+  labs(x = "Black spruce ancestry", y = "PC2 score")
+
+ggarrange(p1,p2)
+```
+
+```{r}
+s <- read.table("allRS_poly_K3.selection")
+
+# convert test statistic to p-value
+pval_PC1 <- as.data.frame(1-pchisq(s[,1],1))
+names(pval_PC1) = "p_PC1"
+
+pval_PC2 <- as.data.frame(1-pchisq(s[,2],1))
+names(pval_PC2) = "p_PC2"
+
+## read positions
+#pos <- read.table("allRS_poly_mafs.sites",sep="\t",header=T, stringsAsFactors=T)
+#dim(p)
+```
+
+```{r}
+PCAngsd_sites <- read.table("allRS_poly_K3.sites")
+MAF_all_sites <- read.table("/gpfs1/cl/ecogen/pbio6800/PopulationGenomics/ANGSD/allRS_poly.mafs.gz", header=T)
+
+pos_filtered <- cbind(MAF_all_sites,PCAngsd_sites)[which(PCAngsd_sites==1),]
+
+dim(pos_filtered)
+```
+
+Making a manhattan plot:
+```{r}
+
+plot(-log10(pval_PC1$p_PC1), col="black", cex=0.8, xlab="Locus position", main="Selection outliers: PCAngsd PC1")
+
+plot(-log10(pval_PC2$p_PC2), col="darkred", cex=0.8, xlab="Locus position", main="Selection outliers: PCAngsd PC2")
+
+```

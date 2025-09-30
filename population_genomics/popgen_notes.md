@@ -112,6 +112,7 @@ This will keep my notes on population genomics coding sessions.
         -   `2101_WISC_Fst.txt`
         -   Located in `~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/Fst`
 -   Also created a bash script called `PCAngsd_RCBS.sh` to use PCAngsd (iterative approach that refines estimation of allele frequencies for each individual as it finds clusters that the individual may have ancestry in)
+    -   Important options included 'K' (\# of groups or clusters to assign ancestry to). K = number of PCA eigenvalues + 1.
     -   Script located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts`
     -   Input beagle file (which has the genotype likelihoods) is located in `/gpfs1/cl/ecogen/pbio6800/PopulationGenomics/ANGSD/RSBS_poly.beagle.gz`
         -   Code for calculating genotype likelihoods is located in `/gpfs1/cl/ecogen/pbio6800/PopulationGenomics/scripts/ANGSD_RSBS_poly.sh`
@@ -125,3 +126,10 @@ This will keep my notes on population genomics coding sessions.
         -   Located in `~/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX`
 -   Also created an rmarkdown script called `PCA_Admix.Rmd` that will let us visualize the PCAngsd
     -   Script located in `/gpfs1/home/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myscripts`
+
+### 9/30/25:
+
+-   Cont. from 9/25/25:
+    -   Eigenvalue = explains the most variance it can given your data set
+-   Created new modified `PCAngsd_allRS_selection.sh` script based on `PCAngsd_RSBS.sh`
+    -   Basically, running same thing except we are excluding the black spruce populations-- we want to see if we can see gene flow after speciation using the PCA based on that

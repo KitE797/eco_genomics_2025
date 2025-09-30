@@ -1,0 +1,2 @@
+mkdir: cannot create directory ‘/users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX’: File exists
+[2025-09-30T16:05:37.532] error: *** JOB 1601991 ON node325 CANCELLED AT 2025-09-30T16:05:37 DUE to SIGNAL Terminated ***
