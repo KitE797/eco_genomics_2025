@@ -36,8 +36,8 @@ READ2=${READ1/_R1*.gz/_R2*.gz}
 
 # make the output file names: print the fastq name, replace _# with _#_clean. Also adding my initials to read name
 
-NAME1=$(echo $READ1 | sed "s/_R1/_R1_clean_KE/g")
-NAME2=$(echo $READ2 | sed "s/_R2/_R2_clean_KE/g")
+NAME1=$(echo $READ1 | sed "s/_R1/_R1_cleanKE/g")
+NAME2=$(echo $READ2 | sed "s/_R2/_R2_cleanKE/g")
 
 # print the input and output to screen 
 
