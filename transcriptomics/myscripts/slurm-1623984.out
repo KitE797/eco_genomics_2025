@@ -1,0 +1,34 @@
+T4R2_S155_L007_R1_001.fastq.gz T4R2_S155_L007_R2_001.fastq.gz
+T4R2_S155_L007_R1_cleanKE_001.fastq.gz T4R2_S155_L007_R2_cleanKE_001.fastq.gz
+Detecting adapter sequence for read1...
+>I7_Nextera_Transposase_1 | >Trans2_rc | >I7_Nextera_Transposase_1 | >Trans2_rc
+CTGTCTCTTATACACATCTCCGAGCCCACGAGAC
+
+Detecting adapter sequence for read2...
+>I5_Nextera_Transposase_1 | >Trans1_rc | >I5_Nextera_Transposase_1 | >Trans1_rc
+CTGTCTCTTATACACATCTGACGCTGCCGACGA
+
+/var/spool/slurm/d/job1623984/slurm_script: line 35: 592585 Killed                  fastp -i ${READ1} -I ${READ2} -o /gpfs1/cl/ecogen/pbio6800/Transcriptomics/cleandata/${NAME1} -O /gpfs1/cl/ecogen/pbio6800/Transcriptomics/cleandata/${NAME2} --detect_adapter_for_pe --trim_poly_g --thread 4 --cut_right --cut_window_size 6 --qualified_quality_phred 20 --length_required 35 --html ${MYREPO}/transcriptomics/myresults/fastp_reports/${NAME1}.html
+T4R3_S154_L007_R1_001.fastq.gz T4R3_S154_L007_R2_001.fastq.gz
+T4R3_S154_L007_R1_cleanKE_001.fastq.gz T4R3_S154_L007_R2_cleanKE_001.fastq.gz
+Detecting adapter sequence for read1...
+>I7_Nextera_Transposase_1 | >Trans2_rc | >I7_Nextera_Transposase_1 | >Trans2_rc
+CTGTCTCTTATACACATCTCCGAGCCCACGAGAC
+
+Detecting adapter sequence for read2...
+>I5_Nextera_Transposase_1 | >Trans1_rc | >I5_Nextera_Transposase_1 | >Trans1_rc
+CTGTCTCTTATACACATCTGACGCTGCCGACGA
+
+/var/spool/slurm/d/job1623984/slurm_script: line 35: 592698 Killed                  fastp -i ${READ1} -I ${READ2} -o /gpfs1/cl/ecogen/pbio6800/Transcriptomics/cleandata/${NAME1} -O /gpfs1/cl/ecogen/pbio6800/Transcriptomics/cleandata/${NAME2} --detect_adapter_for_pe --trim_poly_g --thread 4 --cut_right --cut_window_size 6 --qualified_quality_phred 20 --length_required 35 --html ${MYREPO}/transcriptomics/myresults/fastp_reports/${NAME1}.html
+T4R4_S153_L007_R1_001.fastq.gz T4R4_S153_L007_R2_001.fastq.gz
+T4R4_S153_L007_R1_cleanKE_001.fastq.gz T4R4_S153_L007_R2_cleanKE_001.fastq.gz
+Detecting adapter sequence for read1...
+>I7_Nextera_Transposase_1 | >Trans2_rc | >I7_Nextera_Transposase_1 | >Trans2_rc
+CTGTCTCTTATACACATCTCCGAGCCCACGAGAC
+
+Detecting adapter sequence for read2...
+>I5_Nextera_Transposase_1 | >Trans1_rc | >I5_Nextera_Transposase_1 | >Trans1_rc
+CTGTCTCTTATACACATCTGACGCTGCCGACGA
+
+/var/spool/slurm/d/job1623984/slurm_script: line 35: 592818 Killed                  fastp -i ${READ1} -I ${READ2} -o /gpfs1/cl/ecogen/pbio6800/Transcriptomics/cleandata/${NAME1} -O /gpfs1/cl/ecogen/pbio6800/Transcriptomics/cleandata/${NAME2} --detect_adapter_for_pe --trim_poly_g --thread 4 --cut_right --cut_window_size 6 --qualified_quality_phred 20 --length_required 35 --html ${MYREPO}/transcriptomics/myresults/fastp_reports/${NAME1}.html
+[2025-10-09T16:55:59.610] error: Detected 3 oom_kill events in StepId=1623984.batch. Some of the step tasks have been OOM Killed.

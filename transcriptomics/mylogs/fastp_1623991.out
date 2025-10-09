@@ -1,0 +1,12 @@
+mkdir: cannot create directory ‘/users/k/a/kaeller/projects/eco_genomics_2025/transcriptomics/myresults/fastp_reports’: File exists
+T4R2_S155_L007_R1_001.fastq.gz T4R2_S155_L007_R2_001.fastq.gz
+T4R2_S155_L007_R1_cleanKE_001.fastq.gz T4R2_S155_L007_R2_cleanKE_001.fastq.gz
+Detecting adapter sequence for read1...
+>I7_Nextera_Transposase_1 | >Trans2_rc | >I7_Nextera_Transposase_1 | >Trans2_rc
+CTGTCTCTTATACACATCTCCGAGCCCACGAGAC
+
+Detecting adapter sequence for read2...
+>I5_Nextera_Transposase_1 | >Trans1_rc | >I5_Nextera_Transposase_1 | >Trans1_rc
+CTGTCTCTTATACACATCTGACGCTGCCGACGA
+
+[2025-10-09T17:14:18.660] error: *** JOB 1623991 ON node419 CANCELLED AT 2025-10-09T17:14:18 DUE to SIGNAL Terminated ***
