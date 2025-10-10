@@ -1,0 +1,57 @@
+mkdir: cannot create directory ‘/users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/PCA_ADMIX’: File exists
+------------------------------------
+PCAngsd v1.36.1
+Jonas Meisner and Anders Albrechtsen
+Using 10 thread(s)
+------------------------------------
+
+Traceback (most recent call last):
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/bin/pcangsd", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/lib/python3.11/site-packages/pcangsd/main.py", line 166, in main
+    with open(args.out + ".log", "w") as log:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotADirectoryError: [Errno 20] Not a directory: '/users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/HW1_PCA_ADMIX/RSBS_poly_K2.log'
+------------------------------------
+PCAngsd v1.36.1
+Jonas Meisner and Anders Albrechtsen
+Using 10 thread(s)
+------------------------------------
+
+Traceback (most recent call last):
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/bin/pcangsd", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/lib/python3.11/site-packages/pcangsd/main.py", line 166, in main
+    with open(args.out + ".log", "w") as log:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotADirectoryError: [Errno 20] Not a directory: '/users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/HW1_PCA_ADMIX/RSBS_poly_K3.log'
+------------------------------------
+PCAngsd v1.36.1
+Jonas Meisner and Anders Albrechtsen
+Using 10 thread(s)
+------------------------------------
+
+Traceback (most recent call last):
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/bin/pcangsd", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/lib/python3.11/site-packages/pcangsd/main.py", line 166, in main
+    with open(args.out + ".log", "w") as log:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotADirectoryError: [Errno 20] Not a directory: '/users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/HW1_PCA_ADMIX/RSBS_poly_K4.log'
+------------------------------------
+PCAngsd v1.36.1
+Jonas Meisner and Anders Albrechtsen
+Using 10 thread(s)
+------------------------------------
+
+Traceback (most recent call last):
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/bin/pcangsd", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/gpfs1/sw/rh9/pkgs/pcangsd/1.36.1/pcangsd/lib/python3.11/site-packages/pcangsd/main.py", line 166, in main
+    with open(args.out + ".log", "w") as log:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+NotADirectoryError: [Errno 20] Not a directory: '/users/k/a/kaeller/projects/eco_genomics_2025/population_genomics/myresults/ANGSD/HW1_PCA_ADMIX/RSBS_poly_K5.log'
