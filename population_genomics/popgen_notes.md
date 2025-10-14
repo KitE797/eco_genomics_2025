@@ -133,3 +133,15 @@ This will keep my notes on population genomics coding sessions.
     -   Eigenvalue = explains the most variance it can given your data set
 -   Created new modified `PCAngsd_allRS_selection.sh` script based on `PCAngsd_RSBS.sh`
     -   Basically, running same thing except we are excluding the black spruce populations-- we want to see if we can see gene flow after speciation using the PCA based on that
+
+### HW1 Notes:
+
+## Option 2: Testing for additional genetic structure and ancestry at higher levels of K
+
+-   Created a copy of `PCAngsd_RSBS.sh` called `HW1_PCAngsd_RSBS.sh`, located in myscripts
+-   Created a copy of `PCA_Admix.Rmd` called `HW1_PCA_Admix.Rmd`, located in mydocs
+-   In `HW1_PCAngsd_RSBS.sh`: modified such that now K runs through a loop from 2-5, doing separate pcangsd for each.
+-   Additionally, modified the output path such that it now outputs to a new folder, `HW1_PCA_ADMIX`.
+- Could not figure out a good method to loop through creating figures, so did each level of admix figures individually.
+- Also could not figure out if there was a way to ensure, or even check, that the colors assigned to admixture ancestry were consistent the whole time-- curious about this for future. Basically went through by trial and error.
+- Also, it seemed that some of the admix plots 'flipped' vertically relative to themselves depending on the change of K.

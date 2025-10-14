@@ -164,7 +164,7 @@ text(tapply(1:nrow(pops),pops[ord2,2],mean),-0.05,unique(pops[ord2,2]),xpd=T,cex
 abline(v=cumsum(sapply(unique(pops[ord2,2]),function(x){sum(pops[ord2,2]==x)})),col=1,lwd=1.2)
 
 admix3 <- barplot(t(q3)[,ord3],
-        col=c("#99621E","#D38B5D","#F3FFB6"),
+        col=c("#F3FFB6","#99621E","#D38B5D"),
         space=0,border=NA,
         xlab="Populations",ylab="Admixture proportions",
         main=paste0("Red Spruce-Black Spruce Admixture: K=",K3))
@@ -172,7 +172,7 @@ text(tapply(1:nrow(pops),pops[ord3,2],mean),-0.05,unique(pops[ord3,2]),xpd=T,cex
 abline(v=cumsum(sapply(unique(pops[ord3,2]),function(x){sum(pops[ord3,2]==x)})),col=1,lwd=1.2)
 
 admix4 <- barplot(t(q4)[,ord4],
-        col=c("#99621E","#D38B5D","#F3FFB6","#739E82"),
+        col=c("#D38B5D","#99621E","#739E82","#F3FFB6"),
         space=0,border=NA,
         xlab="Populations",ylab="Admixture proportions",
         main=paste0("Red Spruce-Black Spruce Admixture: K=",K4))
@@ -180,7 +180,7 @@ text(tapply(1:nrow(pops),pops[ord4,2],mean),-0.05,unique(pops[ord4,2]),xpd=T,cex
 abline(v=cumsum(sapply(unique(pops[ord4,2]),function(x){sum(pops[ord4,2]==x)})),col=1,lwd=1.2)
 
 admix5 <- barplot(t(q5)[,ord5],
-        col=c("#99621E","#D38B5D","#F3FFB6","#739E82","#2C5530"),
+        col=c("#F3FFB6","#739E82","#D38B5D","#99621E","#2C5530"),
         space=0,border=NA,
         xlab="Populations",ylab="Admixture proportions",
         main=paste0("Red Spruce-Black Spruce Admixture: K=",K5))
