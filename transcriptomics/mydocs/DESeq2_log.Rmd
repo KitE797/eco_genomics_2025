@@ -72,8 +72,8 @@ median(rowSums(countsTableRound)) #
 ```
 
 ```{r}
-apply(countsTableRound,2,mean) # 2 in the apply function does the action across columns
-apply(countsTableRound,1,mean) # 1 in the apply function does the action across rows
+head(apply(countsTableRound,2,mean)) # 2 in the apply function does the action across columns
+head(apply(countsTableRound,1,mean)) # 1 in the apply function does the action across rows
 ```
 
 ```{r}
@@ -115,5 +115,111 @@ resultsNames(dds)
 ```
 
 ```{r}
+# The goal of transformation "is to remove the dependence of the variance on the mean, particularly the high variance of the logarithm of count data when the mean is low."
+
+# this gives log2(n + 1)
+ntd <- normTransform(dds)
+meanSdPlot(assay(ntd))
+
+# Variance stabilizing transformation
+vsd <- vst(dds, blind=FALSE)
+meanSdPlot(assay(vsd))
+
+```
+
+```{r}
+
+sampleDists <- dist(t(assay(vsd)))
+
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vsd$line, vsd$generation, sep="-")
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+
+# Note any outliers
+```
+
+```{r}
+sampleTree <- hclust(dist(sampleDists), method="average")
+# plot
+plot(sampleTree, main="Sample clustering to detect outliers", sub="", xlab="",cex.lab=1.5, cex.axis=1.5, cex.main=2)
+```
+
+```{r}
+
+# first transform the data for plotting using variance stabilization
+vsd <- vst(dds, blind=FALSE)
+
+pcaData <- plotPCA(vsd, intgroup=c("line","generation"), returnData=TRUE)
+percentVar <- round(100 * attr(pcaData,"percentVar"))
+
+ggplot(pcaData, aes(PC1, PC2, color=line, shape=generation)) +
+  geom_point(size=3) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed()
+```
+
+```{r}
+ggplot(pcaData, aes(PC1, PC2)) +
+  geom_point(size=5, stroke = 1, aes(fill=line, shape=generation, alpha = generation)) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) +
+  scale_shape_manual(values=c(21,22,23,24), labels = c("G1", "G2","G3", "G4"))+
+  #scale_shape_manual(values=c(21,22,23,24) -> circle, square, diamond, triangle
+  scale_fill_manual(values=c('#6699CC',"#CC3333"), labels = c("Control", "Treatment"))+
+  scale_alpha_manual(values = c(1.0, 0.8, 0.7, 0.3), guide = "none") +
+  theme_bw() +
+#  theme(legend.position = "none") +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 3))+
+  theme(text = element_text(size = 20)) +
+  theme(legend.title = element_blank())
+
+```
+
+```{r}
+
+dds$line <- relevel(dds$line, ref = "control")
+dds$generation <- relevel(dds$generation, ref = "G1")
+
+
+dds$group <- factor(paste0(dds$line, dds$generation))
+design(dds) <- ~ group
+dds <- DESeq(dds)
+resultsNames(dds)
+
+resG1_CvT <- results(dds, contrast=c("group","controlG1","treatmentG1"), alpha = 0.05)
+
+summary(resG1_CvT)
+```
+
+```{r}
+resG1_CvT <- resG1_CvT[order(resG1_CvT$padj),]
+head(resG1_CvT)
+
+tail(resG1_CvT)
+```
+
+
+```{r}
+
+# Counts of specific top interaction gene! (important validatition that the normalization, model is working)
+d <-plotCounts(dds, gene="TRINITY_DN148336_c14_g7_i1", intgroup = (c("line","generation")), returnData=TRUE)
+d
+
+p <-ggplot(d, aes(x=line, y=count, color=line, shape=generation)) + 
+  theme_minimal() + theme(text = element_text(size=20), panel.grid.major=element_line(colour="grey"))
+p <- p + geom_point(position=position_jitter(w=0.2,h=0), size=3)
+p <- p + stat_summary(fun = mean, geom = "point", size=5, alpha=0.7) 
+p
+```
+
+```{r}
+
 
 ```

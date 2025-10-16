@@ -27,3 +27,9 @@ Fixing our fastp stuff!
 -   Now in R making a counts matrix using `tximport`!
 -   DESeq2 start of data analysis:
     -   
+    
+# 10/16/25:
+
+- Continuing from 10/14/25
+
+- Note: can use heatmap as part of looking for problematic samples
