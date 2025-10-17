@@ -25,11 +25,21 @@ Fixing our fastp stuff!
         -   Could do a new de nova assembly from these reads (would need to annotate)
 -   Saved a mapping rate file: `mapping_rate_list.txt`
 -   Now in R making a counts matrix using `tximport`!
--   DESeq2 start of data analysis:
-    -   
-    
+-   Started DESeq2 data analysis in `DESeq2_log.Rmd`
+
 # 10/16/25:
 
-- Continuing from 10/14/25
+-   Continuing from 10/14/25
 
-- Note: can use heatmap as part of looking for problematic samples
+-   Continuing DESeq2 analysis in `DESeq2_log.Rmd`, located in `mydocs`
+
+-   Loaded in our libraries, and imported our counts matrix, `counts_matrix.txt`, which we had made in `create_counts_matrix.r` located in `myscripts`
+
+-   Note that DESeq2 needs rounded numbers to work
+
+-   Also imported the metatable, `metatable.txt`, which had been in class directory but now copied over to `mydata`
+
+-   Looked at average number of reads per sample-- we are below rule of thumb of 20M, we are at around ~12M
+- Started actually looking at our DESeq2 analysis, and different genes-- we had one gene that seemed to be giving significance when there wasn't actually much going on, but otherwise seems to work well
+
+-   Note: can use heatmap as part of looking for problematic samples
