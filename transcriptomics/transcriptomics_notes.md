@@ -39,7 +39,19 @@ Fixing our fastp stuff!
 
 -   Also imported the metatable, `metatable.txt`, which had been in class directory but now copied over to `mydata`
 
--   Looked at average number of reads per sample-- we are below rule of thumb of 20M, we are at around ~12M
-- Started actually looking at our DESeq2 analysis, and different genes-- we had one gene that seemed to be giving significance when there wasn't actually much going on, but otherwise seems to work well
+-   Looked at average number of reads per sample-- we are below rule of thumb of 20M, we are at around \~12M
+
+-   Started actually looking at our DESeq2 analysis, and different genes-- we had one gene that seemed to be giving significance when there wasn't actually much going on, but otherwise seems to work well
 
 -   Note: can use heatmap as part of looking for problematic samples
+
+# 10/21/25:
+
+-   Reworked the differential gene expression graph so that it shows DGE for an individual gene across all generations.
+-   Made an MAplot: really significant highlighted in blue. Shows relationship between LFC and magnitude of expression?
+-   Made a volcano plot: tells us about relationship between LFC and significance of DGE
+-   Made a heatmap: for DEGs, tells us about gene expression variation across individual samples among treatment groups
+-   Made a volcano plot
+-   Make a heatmap of G1 sig genes and how they change across generations
+    -   Also did the same for gens 2, 3, and 4-- but mostly to look at 2, as we know 3 and 4 are very similar.
+-   End of class: started trying to make scatterplots for LFC in g1 v g2, etc

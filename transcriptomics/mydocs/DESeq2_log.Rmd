@@ -209,17 +209,315 @@ tail(resG1_CvT)
 ```{r}
 
 # Counts of specific top interaction gene! (important validatition that the normalization, model is working)
-d <-plotCounts(dds, gene="TRINITY_DN148336_c14_g7_i1", intgroup = (c("line","generation")), returnData=TRUE)
+d <-plotCounts(dds, gene="TRINITY_DN93941_c0_g3_i1", intgroup = (c("line","generation")), returnData=TRUE)
 d
 
-p <-ggplot(d, aes(x=line, y=count, color=line, shape=generation)) + 
+d$generation <- factor(d$generation, levels = sort(unique(d$generation)))
+
+p <- ggplot(d, aes(x = generation, y = count, color = line, group = line)) +
   theme_minimal() + theme(text = element_text(size=20), panel.grid.major=element_line(colour="grey"))
-p <- p + geom_point(position=position_jitter(w=0.2,h=0), size=3)
+p <- p + geom_point(position=position_jitter(w=0.2,h=0), size=3, aes(shape = line)) 
 p <- p + stat_summary(fun = mean, geom = "point", size=5, alpha=0.7) 
+p <- p + stat_summary(fun = mean, geom = "line", size = 1.5, aes(group = line), alpha = 0.8)
+p <- p + scale_color_manual(values = c("control" = "blue", "treatment" = "red"))
 p
+```
+Question: What is the relationship between log-fold change and the significance of differential gene expression?
+
+```{r}
+plotMA(resG1_CvT, ylim=c(-5,5))
+
+
+```
+Question: What is the relationship between LFC and significance of DGE?
+```{r}
+# Make a dataframe
+res_df <- as.data.frame(resG1_CvT)
+
+# Remove NAs
+res_df <- res_df[!is.na(res_df$padj), ]
+
+# Add significance column for color mapping
+res_df$significance <- "Not Sig"
+res_df$significance[res_df$padj < 0.05 & res_df$log2FoldChange > 0] <- "Up"
+res_df$significance[res_df$padj < 0.05 & res_df$log2FoldChange < 0] <- "Down"
+
+ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj), color = significance)) +
+  geom_point(alpha = 0.7, size = 2) +
+  scale_color_manual(values = c("Up" = "darkblue", "Down" = "darkred", "Not Sig" = "grey")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "black") +
+  labs(
+    title = "Volcano Plot: Generation 1 (Treatment vs Control)",
+    x = expression(log[2]~Fold~Change),
+    y = expression(-log[10]~Adjusted~p~value)
+  ) +
+  theme_bw(base_size = 16) +
+  theme(legend.title = element_blank())
+
+```
+Question: For DEGs, what does gene expression variation look like across individual samples among treatment groups?
+
+```{r}
+topgenes <- head(rownames(resG1_CvT),100)
+mat <- assay(vsd)[topgenes,]
+mat <- mat - rowMeans(mat)
+df <- as.data.frame(colData(dds)[,c("generation","line")])
+pheatmap(mat, annotation_col=df)
+pheatmap(mat, annotation_col=df, cluster_cols = F)
+```
+Plots to explore DGE between Control vs Treatment across generations
+```{r}
+#Gen1
+resG1_CvT <- results(dds, contrast=c("group","controlG1","treatmentG1"), alpha = 0.05)
+resG1_CvT <- resG1_CvT[order(resG1_CvT$padj),] #sort
+head(resG1_CvT)
+summary(resG1_CvT)
+
+resG1_CvT <- resG1_CvT[!is.na(resG1_CvT$padj),]
+degs_G1_CvTM <- row.names(resG1_CvT[resG1_CvT$padj < 0.05,])
 ```
 
 ```{r}
+#Gen2
+resG2_CvT <- results(dds, contrast=c("group","controlG2","treatmentG2"), alpha = 0.05)
+resG2_CvT <- resG2_CvT[order(resG2_CvT$padj),] #sort
+head(resG2_CvT)
+summary(resG2_CvT)
+
+resG2_CvT <- resG2_CvT[!is.na(resG2_CvT$padj),]
+degs_G2_CvTM <- row.names(resG2_CvT[resG2_CvT$padj < 0.05,])
+```
+
+```{r}
+#Gen3
+resG3_CvT <- results(dds, contrast=c("group","controlG3","treatmentG3"), alpha = 0.05)
+resG3_CvT <- resG3_CvT[order(resG3_CvT$padj),] #sort
+head(resG3_CvT)
+summary(resG3_CvT)
+
+resG3_CvT <- resG3_CvT[!is.na(resG3_CvT$padj),]
+degs_G3_CvTM <- row.names(resG3_CvT[resG3_CvT$padj < 0.05,])
+```
+
+```{r}
+#Gen4
+resG4_CvT <- results(dds, contrast=c("group","controlG4","treatmentG4"), alpha = 0.05)
+resG4_CvT <- resG4_CvT[order(resG4_CvT$padj),] #sort
+head(resG4_CvT)
+summary(resG4_CvT)
+
+resG4_CvT <- resG4_CvT[!is.na(resG4_CvT$padj),]
+degs_G4_CvTM <- row.names(resG4_CvT[resG4_CvT$padj < 0.05,])
+```
+
+
+Question: How does gene expression change across generations for the genes that are initially differentially expressed in Generation 1 (between different developmental temperatures, 18 vs. 22 C)
+
+```{r}
+sig_genes_G1 <- rownames(resG1_CvT[which(resG1_CvT$padj < 0.05 & !is.na(resG1_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat1 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G1, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat1 <- na.omit(lfc_mat1)
+
+pheatmap(lfc_mat1,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 1")
+```
+```{r}
+sig_genes_G2 <- rownames(resG2_CvT[which(resG2_CvT$padj < 0.05 & !is.na(resG2_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat2 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G2, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat2 <- na.omit(lfc_mat2)
+
+pheatmap(lfc_mat2,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 2")
+```
+
+```{r}
+sig_genes_G3 <- rownames(resG3_CvT[which(resG3_CvT$padj < 0.05 & !is.na(resG3_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat3 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G3, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat3 <- na.omit(lfc_mat3)
+
+pheatmap(lfc_mat3,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 3")
+```
+
+```{r}
+sig_genes_G4 <- rownames(resG4_CvT[which(resG4_CvT$padj < 0.05 & !is.na(resG4_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat4 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G4, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat4 <- na.omit(lfc_mat4)
+
+pheatmap(lfc_mat4,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 4")
+```
+
+
+```{r}
+library(eulerr)
+
+# Total
+length(degs_G1_CvTM)  # 573
+length(degs_G2_CvTM)  # 4568 
+length(degs_G3_CvTM)  # 1234
+length(degs_G4_CvTM)  # 48
+
+# Intersections
+length(intersect(degs_G1_CvTM,degs_G2_CvTM))  # 227
+length(intersect(degs_G1_CvTM,degs_G3_CvTM))  # 71
+#length(intersect(degs_G1_CvTM,degs_G4_CvTM)) 
+
+length(intersect(degs_G2_CvTM,degs_G3_CvTM))  # 294
+#length(intersect(degs_G2_CvTM,degs_G4_CvTM))  
+
+#length(intersect(degs_G3_CvTM,degs_G4_CvTM)) 
+
+# To calc number shared in all three contrasts
+int12 <- intersect(degs_G1_CvTM,degs_G2_CvTM)
+length(intersect(degs_G3_CvTM,int12))         # 13
+
+# Number unique
+
+573-227-71+13 #     G1 = 288
+4568-227-294+13 #   G2 = 4060
+1234-71-294+13 #    G3 = 882
+
+
+227-13 # G1&G2 = 214
+71-13  # G1&G3 = 58
+294-13 # G2&G3 = 281
+
+# Note that the names are important and have to be specific to line up the diagram
+fit1 <- euler(c("G1" = 288, "G2" = 4060, "G3" = 882, "G1&G2" = 214, "G1&G3" = 58, "G2&G3" = 281, "G1&G2&G3" = 13))
+
+
+plot(fit1,  lty = 1:3, quantities = TRUE)
+# lty changes the lines
+
+plot(fit1, quantities = TRUE, fill = "transparent",
+     lty = 1:3,
+     labels = list(font = 4))
+
+
+#cross check
+ #  total G1
+ #  total G2
+ #  total G3
+```
+
+
+Trying to make a scatterplot for log-fold change in G1 and log-fold change in G2, etc
+```{r}
+# to get log-fold change: 
+# Make a dataframe
+res_df1 <- as.data.frame(resG1_CvT)
+res_df2 <- as.data.frame(resG2_CvT)
+res_df3 <- as.data.frame(resG3_CvT)
+res_df4 <- as.data.frame(resG4_CvT)
+
+# Remove NAs
+res_df1 <- res_df1[!is.na(res_df1$padj), ]
+res_df2 <- res_df2[!is.na(res_df2$padj), ]
+res_df3 <- res_df3[!is.na(res_df3$padj), ]
+res_df4 <- res_df4[!is.na(res_df4$padj), ]
+
+# Add significance column for color mapping
+res_df1$significance <- "Not Sig"
+res_df1$significance[res_df1$padj < 0.05 & res_df1$log2FoldChange > 0] <- "Up"
+res_df1$significance[res_df1$padj < 0.05 & res_df1$log2FoldChange < 0] <- "Down"
+
+res_df2$significance <- "Not Sig"
+res_df2$significance[res_df2$padj < 0.05 & res_df2$log2FoldChange > 0] <- "Up"
+res_df2$significance[res_df2$padj < 0.05 & res_df2$log2FoldChange < 0] <- "Down"
+
+res_df3$significance <- "Not Sig"
+res_df3$significance[res_df3$padj < 0.05 & res_df3$log2FoldChange > 0] <- "Up"
+res_df3$significance[res_df3$padj < 0.05 & res_df3$log2FoldChange < 0] <- "Down"
+
+res_df4$significance <- "Not Sig"
+res_df4$significance[res_df4$padj < 0.05 & res_df4$log2FoldChange > 0] <- "Up"
+res_df4$significance[res_df4$padj < 0.05 & res_df4$log2FoldChange < 0] <- "Down"
+df <- tibble::rownames_to_column(df, "VALUE")
+
+
+
+big_df <- merge(res_df1, res_df2, by=)
+
+# Actually making plots
+ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj), color = significance)) +
+  geom_point(alpha = 0.7, size = 2) +
+  scale_color_manual(values = c("Up" = "darkblue", "Down" = "darkred", "Not Sig" = "grey")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "black") +
+  labs(
+    title = "Volcano Plot: Generation 1 (Treatment vs Control)",
+    x = expression(log[2]~Fold~Change),
+    y = expression(-log[10]~Adjusted~p~value)
+  ) +
+  theme_bw(base_size = 16) +
+  theme(legend.title = element_blank())
+
+
+
 
 
 ```
+
+
