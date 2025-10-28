@@ -55,3 +55,32 @@ Fixing our fastp stuff!
 -   Make a heatmap of G1 sig genes and how they change across generations
     -   Also did the same for gens 2, 3, and 4-- but mostly to look at 2, as we know 3 and 4 are very similar.
 -   End of class: started trying to make scatterplots for LFC in g1 v g2, etc
+
+# 10/23/25:
+
+-   Going to start looking at our GO enrichment
+-   Made a new Rmd file: `DESeq2toTopGO.Rmd`
+-   Looking at our Pvalues
+-   Actually running the GO analysis!
+    -   Bigger is more significant genes, darker more significant
+-   Also ran revigo
+
+# 10/28/25:
+
+-   Starting Weighted Gene Correlation Network Analysis (WGCNA)
+-   Creating a new rmd file `WGCNA.rmd` , located in mydocs
+    -   Loaded libraries
+    -   Imported counts/sample description table
+    -   Copying `WGCNATrait_Data.csv` over from class directory into mydata
+    -   Importing this phenotypic data into dataset, then filtering for samples we have trait data for, then for only the top 50%. Creating a subset matrix dataset from that
+    -   Setting up soft thresholds:
+        -   0.8 is recommended, which is why we set the yintercept to that
+        -   Want to be at an R2 above 0.8 but have a mean connectivity that's actually biologically meaningfully (ie, not too many bins with not enough stuff in them)
+        -   Having everyone go around and choose different amount of soft-power (from 16-24)-- I will be doing 21
+        -   Using `blockwiseModules()` to actually start creating our network
+        -   Got 18 modules using this. Grey modules should be the largest, catch-all of things that aren't really correlated with other things
+    -   Cyan ended up being my most significiant bin, with r=0.43
+    -   Not enough genes to do a full GO analysis– instead we're going to see what those GO terms actually are from using REVIGO
+    -   Revigo sorted it into two (biological) categories:
+        -   phosphate-containing compound metabolic process
+        -   proton motive force-driven ATP synthesis

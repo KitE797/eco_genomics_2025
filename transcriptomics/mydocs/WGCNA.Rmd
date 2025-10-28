@@ -1,0 +1,257 @@
+---
+title: "WGCNA"
+output: html_document
+date: "2025-10-28"
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="~/projects/eco_genomics_2025/transcriptomics/mydata")
+
+```
+
+loading our libraries:
+```{r}
+library(WGCNA)
+library(DESeq2)
+library(tidyverse)
+library(CorLevelPlot)
+library(gridExtra) 
+library(Rmisc)
+```
+
+Importing counts matrix, sample description table
+```{r}
+# Import the counts matrix
+countsTable <- read.csv("counts_matrix.csv", header=TRUE, row.names=1)
+dim(countsTable)
+
+countsTableRound <- round(countsTable) # bc DESeq2 doesn't like decimals (and Salmon outputs data with decimals)
+# Corrects the column names to match between the metadata table and the counts matrix.
+colnames(countsTableRound) <- substr(colnames(countsTableRound), start=1, stop = 4)
+
+#import the sample description table
+conds <- read.delim("metadata.txt", header=TRUE, stringsAsFactors = TRUE, row.names=1)
+
+```
+
+Creating DESeq object, filtering
+```{r}
+#### Create a DESeq object and define the experimental design here with the tilda
+
+dds <- DESeqDataSetFromMatrix(countData = countsTableRound, colData=conds, 
+                              design= ~ generation + line)
+
+dim(dds)
+
+# Filter out genes with too few reads - remove all genes with counts < 15 in more than 75% of 24 samples, so 18)
+## suggested by WGCNA on RNAseq FAQ
+
+dds <- dds[rowSums(counts(dds) >= 15) >= 18,]
+nrow(dds) 
+
+dds$line <- relevel(dds$line, ref = "control")
+dds$generation <- relevel(dds$generation, ref = "G1")
+
+dds$group <- factor(paste0(dds$line, dds$generation))
+design(dds) <- ~ group
+dds <- DESeq(dds)
+
+# transform the data using variance stabilization
+vsd <- vst(dds, blind=FALSE)
+```
+
+
+Importing the phenotypic data, creating a subset matrix from filtering
+```{r}
+# Import the phenotypic data 
+
+ULT_trait <- read.csv("WGCNA_TraitData.csv", 
+                      header = TRUE, 
+                      stringsAsFactors = FALSE,
+                      row.names = 1)
+                      
+# Make sure ULT_trait is a data frame
+ULT_trait <- as.data.frame(ULT_trait)
+
+
+#make sure you have the varience stabilized dds object 
+
+# transform normalized counts
+norm.counts <- assay(vsd) %>% 
+  t()
+
+#filter to only look at the samples that we have data for 
+# Filter only samples present in norm.counts
+ULT_trait <- ULT_trait[rownames(ULT_trait) %in% rownames(norm.counts), , drop = FALSE]
+
+# calculate variance for each gene. 2 is for 'look across columns'
+gene_vars <- apply(norm.counts, 2, var)
+
+# keep top 50% most variable genes (adjust proportion as needed)
+# if we didn't have an even number, we would want to round down
+n_keep <- floor(length(gene_vars) * 0.5) #
+high_var_genes <- names(sort(gene_vars, decreasing = TRUE))[1:n_keep]
+
+# subset matrix
+norm.counts <- norm.counts[, high_var_genes]
+```
+
+
+Setting up soft thresholds
+```{r}
+# Choose a set of soft-thresholding powers
+power <- c(c(1:10), seq(from = 12, to = 50, by = 2)) #calculate the networks by a variety of powers
+sft <- pickSoftThreshold(norm.counts, 
+                         powerVector = power,
+                         networkType = "signed",
+                         verbose = 5)
+
+sft.data <-sft$fitIndices
+#visualization to pick power
+
+#0.8 is recommended, which is why the yintercept is set to that
+a1 <- ggplot(sft.data, aes(Power, SFT.R.sq, label = Power)) +
+  geom_point() +
+  geom_text(nudge_y = 0.1) +
+  geom_hline(yintercept = 0.8, color = 'red') +
+  labs(x = 'Power', y = 'Scale free topology model fit, signed R^2') +
+  theme_classic()
+
+
+a2 <- ggplot(sft.data, aes(Power, mean.k., label = Power)) +
+  geom_point() +
+  geom_text(nudge_y = 0.1) +
+  labs(x = 'Power', y = 'Mean Connectivity') +
+  theme_classic()
+
+
+grid.arrange(a1, a2, ncol = 2)
+```
+```{r}
+# convert matrix to numeric
+norm.counts[] <- sapply(norm.counts, as.numeric)
+dim(norm.counts) # check dimensions: 
+soft_power <- 21
+temp_cor <- cor
+cor <- WGCNA::cor
+
+# set maxblocksize to greater than the number of genes to run network construction all at once
+# memory estimate w.r.t blocksize
+bwnet <- blockwiseModules(norm.counts,
+                          maxBlockSize = 8000,
+                          TOMType = "signed",
+                          power = soft_power,
+                          mergeCutHeight = 0.25,
+                          numericLabels = FALSE,
+                          randomSeed = 1234,
+                          verbose = 3)
+
+# This step takes a while so you can save it here for future work.
+save(bwnet, file = "bwnet_results_WGCNA.RData")
+load("bwnet_results_WGCNA.RData") #to load the bwnet file back in 
+
+cor <- temp_cor
+```
+
+```{r}
+module_eigengenes <- bwnet$MEs
+
+# Print out a preview
+head(module_eigengenes)
+
+# get number of genes for each module
+table(bwnet$colors)
+
+# Plot the dendrogram and the module colors before and after merging underneath
+plotDendroAndColors(bwnet$dendrograms[[1]], cbind(bwnet$unmergedColors, bwnet$colors),
+                    c("unmerged", "merged"),
+                    dendroLabels = FALSE,
+                    addGuide = TRUE,
+                    hang= 0.03,
+                    guideHang = 0.05)
+```
+
+```{r}
+# Define numbers of genes and samples
+nSamples <- nrow(norm.counts) #
+nGenes <- ncol(norm.counts) #
+
+# "use='p'": using pearson's correlation
+# correlation between module eigengenes and trait (ULT)
+module.trait.corr <- cor(module_eigengenes, ULT_trait, use = 'p')
+module.trait.corr.pvals <- corPvalueStudent(module.trait.corr, nSamples)
+
+# merge eigengenes with trait data
+heatmap.data <- merge(module_eigengenes, ULT_trait, by = "row.names") %>%
+  column_to_rownames(var = "Row.names")
+
+# automatically detect eigengene and trait columns
+eigengene_cols <- grep("^ME", colnames(heatmap.data), value = TRUE)
+trait_cols <- colnames(ULT_trait)
+
+# plot correlations
+CorLevelPlot(heatmap.data,
+             x = trait_cols,
+             y = eigengene_cols,
+             col = c("blue1", "skyblue", "white", "pink", "red"))
+```
+
+
+
+
+```{r}
+module.gene.mapping <- as.data.frame(bwnet$colors) # assigns module membership to each gene
+module.gene.mapping %>% 
+  filter(`bwnet$colors` == 'cyan') %>% 
+  rownames()
+
+groups <- conds[,c(1,2)]
+module_eigengene.metadata <- merge(groups, heatmap.data, by = 'row.names')
+
+library(Rmisc)
+#Create a summary data frame of a particular module eigengene information
+MEcyan_summary <- summarySE(module_eigengene.metadata, measurevar="MEcyan", groupvars=c("generation","line"))
+
+#Plot a line interaction plot of a particular module eigengene
+ggplot(MEcyan_summary, aes(x=as.factor(generation), y=MEcyan, color=line, fill = line, shape = line)) +
+  geom_point(size=5, stroke = 1.5 ) +
+  geom_errorbar(aes(ymin=MEcyan-se, ymax=MEcyan+se), width=.15) +
+  geom_line(aes(color=line, group=line, linetype = line)) +
+  scale_color_manual(values = c('blue', "darkcyan")) +
+  scale_shape_manual(values=c(21,23), labels = c("Ambient","22 at G1"))+
+  scale_fill_manual(values=c('blue',"darkcyan"), labels = c("Ambient","22 at G1"))+
+  xlab("Generation") +
+  theme_bw() +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 4))+
+  theme(text = element_text(size = 20)) +
+  theme(panel.grid.minor.y = element_blank(), plot.margin = margin(0,6,0,6))
+```
+```{r}
+# Read GO terms file (tonsa_go) provided in 
+tonsa_go <- read.delim("Genes_GO_terms_output.tsv", header = TRUE) %>%
+  slice(-c(1,2)) %>%  # remove header rows if present
+  na.omit()  # remove missing GO annotations
+
+# Choose which module to explore -- change the name here
+geneIDs_cyan <- module.gene.mapping %>% filter(`bwnet$colors` == 'cyan') %>% rownames()
+
+# Filter annotation for module genes -- change the name here
+module_GO <- tonsa_go[tonsa_go$geneID %in% geneIDs_cyan, ]
+
+go_terms <- module_GO$GO
+
+# Split by semicolon and flatten
+go_split <- unlist(strsplit(go_terms, ";"))
+
+# Get unique GO categories
+unique_go <- unique(go_split)
+
+# print as a clean list
+cat(unique_go, sep = "\n")
+```
+
+
+
+
