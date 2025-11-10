@@ -1,0 +1,424 @@
+---
+title: "HW2"
+output: html_document
+date: "2025-11-8"
+---
+
+```{r setup, include=FALSE}
+# Setting up directory
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="~/projects/eco_genomics_2025/transcriptomics/mydata")
+```
+
+```{r}
+## Importing libraries
+library(DESeq2)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(ggpubr)
+library(vsn)
+#install.packages("reshape2")
+library(reshape2)
+library("pheatmap")
+library("vsn")
+library("RColorBrewer")
+```
+
+```{r}
+####################################################
+### Import our data
+####################################################
+# Import the counts matrix
+countsTable <- read.table("counts_matrix.txt", header=TRUE, row.names=1)
+head(countsTable)
+dim(countsTable)
+```
+
+```{r}
+# Rounding the results so that DESeq2 works
+countsTableRound <- round(countsTable) # DESeq2 doesn't like decimals, Salmon outputs data with decimals
+head(countsTableRound)
+```
+
+```{r}
+#import the sample description table
+conds <- read.delim("metadata.txt", header=TRUE, stringsAsFactors = TRUE, row.names=1)
+head(conds)
+```
+
+
+```{r}
+####################################################
+### Start working with DESeq2!
+####################################################
+# Corrects the column names to match between the metadata table and the counts matrix
+colnames(countsTableRound) <- substr(colnames(countsTableRound), start = 1, stop = 4)
+
+#### Create a DESeq object and define the experimental design here with the tilda
+
+dds <- DESeqDataSetFromMatrix(countData = countsTableRound, colData=conds, 
+                              design= ~ generation + line + generation:line)
+
+dim(dds)
+
+# Filter out genes with too few reads - remove all genes with counts < 15 in more than 75% of 24 samples, so 18)
+## suggested by WGCNA on RNAseq FAQ
+
+dds <- dds[rowSums(counts(dds) >= 15) >= 18,]
+nrow(dds) 
+# 14566 - How many transcripts have at least 15 reads (a.k.a counts) in 75% of the samples
+
+# Run the DESeq model to test for differential gene expression
+dds <- DESeq(dds)
+
+# List the results you've generated
+resultsNames(dds)
+# Copy the results names 
+```
+
+```{r}
+# The goal of transformation "is to remove the dependence of the variance on the mean, particularly the high variance of the logarithm of count data when the mean is low."
+
+# this gives log2(n + 1)
+ntd <- normTransform(dds)
+
+# Variance stabilizing transformation
+vsd <- vst(dds, blind=FALSE)
+
+```
+
+```{r}
+
+# first transform the data for plotting using variance stabilization
+vsd <- vst(dds, blind=FALSE)
+
+```
+
+
+
+```{r}
+
+dds$line <- relevel(dds$line, ref = "control")
+dds$generation <- relevel(dds$generation, ref = "G1")
+
+
+dds$group <- factor(paste0(dds$line, dds$generation))
+design(dds) <- ~ group
+dds <- DESeq(dds)
+resultsNames(dds)
+
+resG1_CvT <- results(dds, contrast=c("group","controlG1","treatmentG1"), alpha = 0.05)
+
+summary(resG1_CvT)
+```
+
+```{r}
+topgenes <- head(rownames(resG1_CvT),100)
+mat <- assay(vsd)[topgenes,]
+mat <- mat - rowMeans(mat)
+df <- as.data.frame(colData(dds)[,c("generation","line")])
+pheatmap(mat, annotation_col=df)
+pheatmap(mat, annotation_col=df, cluster_cols = F)
+```
+Plots to explore DGE between Control vs Treatment across generations
+```{r}
+#Gen1
+resG1_CvT <- results(dds, contrast=c("group","controlG1","treatmentG1"), alpha = 0.05)
+resG1_CvT <- resG1_CvT[order(resG1_CvT$padj),] #sort
+head(resG1_CvT)
+summary(resG1_CvT)
+
+resG1_CvT <- resG1_CvT[!is.na(resG1_CvT$padj),]
+degs_G1_CvTM <- row.names(resG1_CvT[resG1_CvT$padj < 0.05,])
+```
+
+```{r}
+#Gen2
+resG2_CvT <- results(dds, contrast=c("group","controlG2","treatmentG2"), alpha = 0.05)
+resG2_CvT <- resG2_CvT[order(resG2_CvT$padj),] #sort
+head(resG2_CvT)
+summary(resG2_CvT)
+
+resG2_CvT <- resG2_CvT[!is.na(resG2_CvT$padj),]
+degs_G2_CvTM <- row.names(resG2_CvT[resG2_CvT$padj < 0.05,])
+```
+
+```{r}
+#Gen3
+resG3_CvT <- results(dds, contrast=c("group","controlG3","treatmentG3"), alpha = 0.05)
+resG3_CvT <- resG3_CvT[order(resG3_CvT$padj),] #sort
+head(resG3_CvT)
+summary(resG3_CvT)
+
+resG3_CvT <- resG3_CvT[!is.na(resG3_CvT$padj),]
+degs_G3_CvTM <- row.names(resG3_CvT[resG3_CvT$padj < 0.05,])
+```
+
+```{r}
+#Gen4
+resG4_CvT <- results(dds, contrast=c("group","controlG4","treatmentG4"), alpha = 0.05)
+resG4_CvT <- resG4_CvT[order(resG4_CvT$padj),] #sort
+head(resG4_CvT)
+summary(resG4_CvT)
+
+resG4_CvT <- resG4_CvT[!is.na(resG4_CvT$padj),]
+degs_G4_CvTM <- row.names(resG4_CvT[resG4_CvT$padj < 0.05,])
+```
+
+```{r}
+sig_genes_G1 <- rownames(resG1_CvT[which(resG1_CvT$padj < 0.05 & !is.na(resG1_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat1 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G1, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat1 <- na.omit(lfc_mat1)
+
+pheatmap(lfc_mat1,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 1")
+```
+```{r}
+sig_genes_G2 <- rownames(resG2_CvT[which(resG2_CvT$padj < 0.05 & !is.na(resG2_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat2 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G2, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat2 <- na.omit(lfc_mat2)
+
+pheatmap(lfc_mat2,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 2")
+```
+
+```{r}
+sig_genes_G3 <- rownames(resG3_CvT[which(resG3_CvT$padj < 0.05 & !is.na(resG3_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat3 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G3, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat3 <- na.omit(lfc_mat3)
+
+pheatmap(lfc_mat3,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 3")
+```
+
+```{r}
+sig_genes_G4 <- rownames(resG4_CvT[which(resG4_CvT$padj < 0.05 & !is.na(resG4_CvT$padj)), ])
+
+# Combine into a data frame
+lfc_mat4 <- data.frame(
+  Gen1 = resG1_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen2 = resG2_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen3 = resG3_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen4 = resG4_CvT[sig_genes_G4, "log2FoldChange"]
+)
+
+# Remove any rows with missing values (some genes may not be in all result tables)
+lfc_mat4 <- na.omit(lfc_mat4)
+
+pheatmap(lfc_mat4,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in Gen 4")
+```
+
+
+```{r}
+# Heatmap All
+
+# get list of all genes that are significant in at least one generation category
+all_gen_sig <- c(sig_genes_G1, sig_genes_G2, sig_genes_G3, sig_genes_G4)
+
+all_gen_sig_df <- data.frame(
+  Gene = all_gen_sig
+)
+
+# creating individual dataframes to later condense
+lfc_mat_1 <- data.frame(
+  Gene = sig_genes_G1,
+  Gen1_Gen1 = resG1_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen1_Gen2 = resG2_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen1_Gen3 = resG3_CvT[sig_genes_G1, "log2FoldChange"],
+  Gen1_Gen4 = resG4_CvT[sig_genes_G1, "log2FoldChange"]
+)
+
+lfc_mat_2 <- data.frame(
+  Gene = sig_genes_G2,
+  Gen2_Gen1 = resG1_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen2_Gen2 = resG2_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen2_Gen3 = resG3_CvT[sig_genes_G2, "log2FoldChange"],
+  Gen2_Gen4 = resG4_CvT[sig_genes_G2, "log2FoldChange"]
+)
+
+lfc_mat_3 <- data.frame(
+  Gene = sig_genes_G3,
+  Gen3_Gen1 = resG1_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen3_Gen2 = resG2_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen3_Gen3 = resG3_CvT[sig_genes_G3, "log2FoldChange"],
+  Gen3_Gen4 = resG4_CvT[sig_genes_G3, "log2FoldChange"]
+)
+
+lfc_mat_4 <- data.frame(
+  Gene = sig_genes_G4,
+  Gen4_Gen1 = resG1_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen4_Gen2 = resG2_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen4_Gen3 = resG3_CvT[sig_genes_G4, "log2FoldChange"],
+  Gen4_Gen4 = resG4_CvT[sig_genes_G4, "log2FoldChange"]
+)
+
+# merging the dataframes, reformatting for pheatmap
+lfc_merge12 <- merge(
+  x = lfc_mat_1,
+  y = lfc_mat_2,
+  by = "Gene",
+  all = TRUE
+)
+
+lfc_merge123 <- merge(
+  x = lfc_merge12,
+  y = lfc_mat_3,
+  by = "Gene",
+  all = TRUE  
+)
+
+lfc_merge_all <- merge(
+  x = lfc_merge123,
+  y = lfc_mat_4,
+  by = "Gene",
+  all = TRUE    
+) |> select(
+  !Gene
+)
+
+# replacing NAs with 0s
+lfc_merge_all[is.na(lfc_merge_all)] <- 0
+
+
+pheatmap(lfc_merge_all,
+         scale = "row",             # scales each gene’s LFCs across generations
+         color = colorRampPalette(c("blue", "white", "red"))(50),
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "complete",
+         show_rownames = FALSE,
+         main = "LFC (Treatment vs Control) of Sig Genes in All Generations")
+
+
+```
+
+
+```{r}
+library(eulerr)
+
+# Total
+length(degs_G1_CvTM)  # 573
+length(degs_G2_CvTM)  # 4568 
+length(degs_G3_CvTM)  # 1234
+length(degs_G4_CvTM)  # 48
+
+# Intersections
+int12 = length(intersect(degs_G1_CvTM,degs_G2_CvTM))  # 227
+int13 = length(intersect(degs_G1_CvTM,degs_G3_CvTM))  # 71
+int14 = length(intersect(degs_G1_CvTM,degs_G4_CvTM))  # 2
+
+int23 = length(intersect(degs_G2_CvTM,degs_G3_CvTM))  # 294
+int24 = length(intersect(degs_G2_CvTM,degs_G4_CvTM))  # 13
+
+int34 = length(intersect(degs_G3_CvTM,degs_G4_CvTM))  # 12
+
+# Three contrasts
+intg12 <- intersect(degs_G1_CvTM,degs_G2_CvTM)
+intg23 <- intersect(degs_G2_CvTM,degs_G3_CvTM)
+intg14 <- intersect(degs_G1_CvTM,degs_G4_CvTM)
+#123
+int123 = length(intersect(degs_G3_CvTM,intg12))         # 13
+#124
+int124 = length(intersect(degs_G4_CvTM,intg12))         # 1
+#134
+int134 = length(intersect(degs_G3_CvTM,intg14))         # 1
+#234
+int234 = length(intersect(degs_G4_CvTM,intg23))         # 6
+
+# Number unique
+#total-int12-int13-int14+int123+int124+int134-int1234
+
+G1 = 573-227-71-2+13+1+1-1     # G1 = 287
+G2 = 4568-227-294-13+13+1+6-1  # G2 = 4053
+G3 = 1234-71-294-12+13+1+6-1   # G3 = 876
+G4 = 48-2-13-12+1+1+6-1        # G4 = 28
+
+#int12-int123-int124+int1234
+
+int12-int123-int124+1 # G1&G2 = 214
+int13-int123-int134+1  # G1&G3 = 58
+int14-int124-int134+1 # G1&G4 = 1
+int24-int124-int234+1 # G2G4 = 7
+int23-int234-int123+1 # G2G3 = 276
+int34-int234-int134+1 #G3G4 = 6
+
+# Note that the names are important and have to be specific to line up the diagram
+fit1 <- euler(c("G1" = G1, "G2" = G2, "G3" = G3, "G4" = G4, "G1&G2" = 214, "G1&G3" = 58, "G2&G3" = 276, "G1&G4" = 1, "G2&G4" = 7, "G3&G4" = 6, "G1&G2&G3" = int123, "G1&G2&G4" = int124, "G1&G3&G4" = int134, "G2&G3&G4" = int234, "G1&G2&G3&G4" = 1))
+
+
+plot(fit1,  lty = 1:3, quantities = TRUE)
+# lty changes the lines
+
+plot(fit1, quantities = TRUE, fill = "transparent",
+     lty = 1:3,
+     labels = list(font = 4))
+
+
+#cross check
+ #  total G1
+ #  total G2
+ #  total G3
+```
+
+
+
+
+
+```
+
+
