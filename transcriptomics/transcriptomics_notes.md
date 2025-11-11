@@ -84,3 +84,14 @@ Fixing our fastp stuff!
     -   Revigo sorted it into two (biological) categories:
         -   phosphate-containing compound metabolic process
         -   proton motive force-driven ATP synthesis
+        
+# Homework 2 Notes
+- My session closed out on me before I had saved, so I lost a lot of progress and had to restart
+- Loaded likely libraries, imported counts matrix, rounded counts, imported sample description table
+- Used DESeq2 to find DEG
+- Before filtering, 119438 genes. After, 14566. Filtering = at least 15 reads in 75% of samples.
+- Used results() to find significant DEGs between the treatment and controls for each generation individually. Created individual heatmaps for each of these.
+- Used each of the individual lists of DEGs to find all DEGs that are significantly expressed in at least one generation. Then, created a merged dataframe by merging according to gene. Columns were separated with a format of `genX_genY`, where genX is the generation that the gene has significant LFC in, and genY is the LFC of that gene in other generations, regardless of its significance.
+- Before losing my save, I also created a heatmap that was in "long" format rather than the short format described above, and created it using ggplot geom_tile(). While it did not allow me to create a dendrogram, it did allow me to group them as I originally envisioned according to generation. However, I thought the dendrogram plot using pheatmap worked better.
+- Also created a four-way euler plot. There was only 1 overlapping gene for all four generations.
+

@@ -35,15 +35,11 @@ library("RColorBrewer")
 countsTable <- read.table("counts_matrix.txt", header=TRUE, row.names=1)
 head(countsTable)
 dim(countsTable)
-```
 
-```{r}
 # Rounding the results so that DESeq2 works
 countsTableRound <- round(countsTable) # DESeq2 doesn't like decimals, Salmon outputs data with decimals
 head(countsTableRound)
-```
 
-```{r}
 #import the sample description table
 conds <- read.delim("metadata.txt", header=TRUE, stringsAsFactors = TRUE, row.names=1)
 head(conds)
@@ -79,27 +75,32 @@ resultsNames(dds)
 # Copy the results names 
 ```
 
-```{r}
-# The goal of transformation "is to remove the dependence of the variance on the mean, particularly the high variance of the logarithm of count data when the mean is low."
-
-# this gives log2(n + 1)
-ntd <- normTransform(dds)
-
-# Variance stabilizing transformation
-vsd <- vst(dds, blind=FALSE)
-
-```
 
 ```{r}
+####################################################
+### Start working with DESeq2!
+####################################################
+# Corrects the column names to match between the metadata table and the counts matrix
+colnames(countsTableRound) <- substr(colnames(countsTableRound), start = 1, stop = 4)
 
-# first transform the data for plotting using variance stabilization
-vsd <- vst(dds, blind=FALSE)
+#### Create a DESeq object and define the experimental design here with the tilda
 
-```
+dds <- DESeqDataSetFromMatrix(countData = countsTableRound, colData=conds, 
+                              design= ~ generation + line + generation:line)
+dim(dds)
 
+# Filter out genes with too few reads - remove all genes with counts < 15 in more than 75% of 24 samples, so 18)
+## suggested by WGCNA on RNAseq FAQ
 
+dds <- dds[rowSums(counts(dds) >= 15) >= 18,]
+nrow(dds) 
+# 14566 - How many transcripts have at least 15 reads (a.k.a counts) in 75% of the samples
 
-```{r}
+# Run the DESeq model to test for differential gene expression
+dds <- DESeq(dds)
+
+# List the results you've generated
+#resultsNames(dds)
 
 dds$line <- relevel(dds$line, ref = "control")
 dds$generation <- relevel(dds$generation, ref = "G1")
@@ -116,6 +117,9 @@ summary(resG1_CvT)
 ```
 
 ```{r}
+# first transform the data for plotting using variance stabilization
+vsd <- vst(dds, blind=FALSE)
+
 topgenes <- head(rownames(resG1_CvT),100)
 mat <- assay(vsd)[topgenes,]
 mat <- mat - rowMeans(mat)
@@ -123,6 +127,8 @@ df <- as.data.frame(colData(dds)[,c("generation","line")])
 pheatmap(mat, annotation_col=df)
 pheatmap(mat, annotation_col=df, cluster_cols = F)
 ```
+
+
 Plots to explore DGE between Control vs Treatment across generations
 ```{r}
 #Gen1
@@ -133,9 +139,7 @@ summary(resG1_CvT)
 
 resG1_CvT <- resG1_CvT[!is.na(resG1_CvT$padj),]
 degs_G1_CvTM <- row.names(resG1_CvT[resG1_CvT$padj < 0.05,])
-```
 
-```{r}
 #Gen2
 resG2_CvT <- results(dds, contrast=c("group","controlG2","treatmentG2"), alpha = 0.05)
 resG2_CvT <- resG2_CvT[order(resG2_CvT$padj),] #sort
@@ -144,9 +148,7 @@ summary(resG2_CvT)
 
 resG2_CvT <- resG2_CvT[!is.na(resG2_CvT$padj),]
 degs_G2_CvTM <- row.names(resG2_CvT[resG2_CvT$padj < 0.05,])
-```
 
-```{r}
 #Gen3
 resG3_CvT <- results(dds, contrast=c("group","controlG3","treatmentG3"), alpha = 0.05)
 resG3_CvT <- resG3_CvT[order(resG3_CvT$padj),] #sort
@@ -155,9 +157,7 @@ summary(resG3_CvT)
 
 resG3_CvT <- resG3_CvT[!is.na(resG3_CvT$padj),]
 degs_G3_CvTM <- row.names(resG3_CvT[resG3_CvT$padj < 0.05,])
-```
 
-```{r}
 #Gen4
 resG4_CvT <- results(dds, contrast=c("group","controlG4","treatmentG4"), alpha = 0.05)
 resG4_CvT <- resG4_CvT[order(resG4_CvT$padj),] #sort
@@ -190,8 +190,8 @@ pheatmap(lfc_mat1,
          clustering_method = "complete",
          show_rownames = FALSE,
          main = "LFC (Treatment vs Control) of Sig Genes in Gen 1")
-```
-```{r}
+
+
 sig_genes_G2 <- rownames(resG2_CvT[which(resG2_CvT$padj < 0.05 & !is.na(resG2_CvT$padj)), ])
 
 # Combine into a data frame
@@ -213,9 +213,7 @@ pheatmap(lfc_mat2,
          clustering_method = "complete",
          show_rownames = FALSE,
          main = "LFC (Treatment vs Control) of Sig Genes in Gen 2")
-```
 
-```{r}
 sig_genes_G3 <- rownames(resG3_CvT[which(resG3_CvT$padj < 0.05 & !is.na(resG3_CvT$padj)), ])
 
 # Combine into a data frame
@@ -237,9 +235,8 @@ pheatmap(lfc_mat3,
          clustering_method = "complete",
          show_rownames = FALSE,
          main = "LFC (Treatment vs Control) of Sig Genes in Gen 3")
-```
 
-```{r}
+
 sig_genes_G4 <- rownames(resG4_CvT[which(resG4_CvT$padj < 0.05 & !is.na(resG4_CvT$padj)), ])
 
 # Combine into a data frame
@@ -331,6 +328,9 @@ lfc_merge_all <- merge(
   !Gene
 )
 
+# DEG in all 4 generations
+na.omit(lfc_merge_all)
+
 # replacing NAs with 0s
 lfc_merge_all[is.na(lfc_merge_all)] <- 0
 
@@ -398,7 +398,7 @@ int23-int234-int123+1 # G2G3 = 276
 int34-int234-int134+1 #G3G4 = 6
 
 # Note that the names are important and have to be specific to line up the diagram
-fit1 <- euler(c("G1" = G1, "G2" = G2, "G3" = G3, "G4" = G4, "G1&G2" = 214, "G1&G3" = 58, "G2&G3" = 276, "G1&G4" = 1, "G2&G4" = 7, "G3&G4" = 6, "G1&G2&G3" = int123, "G1&G2&G4" = int124, "G1&G3&G4" = int134, "G2&G3&G4" = int234, "G1&G2&G3&G4" = 1))
+fit1 <- euler(c("G1" = G1, "G2" = G2, "G3" = G3, "G4" = G4, "G1&G2" = 214, "G1&G3" = 58, "G2&G3" = 276, "G1&G4" = 1, "G2&G4" = 7, "G3&G4" = 6, "G1&G2&G3" = int123, "G1&G2&G4" = int124, "G1&G3&G4" = int134, "G2&G3&G4" = int234, "G1&G2&G3&G4" = 1), shape = "ellipse")
 
 
 plot(fit1,  lty = 1:3, quantities = TRUE)
