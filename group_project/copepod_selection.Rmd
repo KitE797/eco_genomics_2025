@@ -1,0 +1,80 @@
+---
+title: "copepod_selection"
+output: html_document
+date: "2025-12-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir="/gpfs1/cl/ecogen/pbio6800/GroupProjects/tripods/data/")
+```
+
+```{r}
+
+library(tidyverse)
+library(dplyr)
+
+```
+
+```{r}
+
+metatable <- read.table("metadata.csv", sep=",", header=T)
+
+# filtering for latitudinal samples: MR. Looking at only Clade F in the late season. For Florida.
+lat_samp_MR = metatable |> filter(
+  Clade == "F",
+  population == "MR",
+  season == "late"
+)
+
+# latitude: GW. Clade F, late season, Maryland.
+lat_samp_GW = metatable |> filter(
+  Clade == "F",
+  population == "GW",
+  season == "late"
+)
+
+# seasonal 1: GW, Clade F, all seasons, Maryland.
+sea_samp_GW = metatable |> filter(
+  Clade == "F",
+  population == "GW"
+)
+
+# seasonal 2: RW, Clade X, all seasons, Canada.
+sea_samp_RW = metatable |> filter(
+  Clade == "X",
+  population == "RW"
+)
+
+### Now need to make these into parameter files. 
+lat_samp_MR |> write.table(
+  file = "lat_samp_MR.txt",
+  sep = "\t"
+)
+
+lat_samp_GW |> write.table(
+  file = "lat_samp_GW.txt",
+  sep = "\t"
+)
+
+sea_samp_GW |> write.table(
+  file = "sea_samp_GW.txt",
+  sep = "\t"
+)
+
+sea_samp_RW |> write.table(
+  file = "sea_samp_RW.txt",
+  sep = "\t"
+)
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
