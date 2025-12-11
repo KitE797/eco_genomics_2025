@@ -24,14 +24,14 @@ metatable <- read.table("metadata.csv", sep=",", header=T)
 lat_samp_MR = metatable |> filter(
   Clade == "F",
   population == "MR",
-  season == "late"
+  season == "peak"
 )
 
 # latitude: GW. Clade F, late season, Maryland.
 lat_samp_GW = metatable |> filter(
   Clade == "F",
   population == "GW",
-  season == "late"
+  season == "peak"
 )
 
 # seasonal 1: GW, Clade F, all seasons, Maryland.
